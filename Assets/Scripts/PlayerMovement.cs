@@ -53,32 +53,28 @@ public class PlayerMovement : MonoBehaviour
                 playerAnim.SetBool("isAttacking", true);
             break;
         }
-        Debug.Log(transform.forward);
         
     }
 
     public void OnMovement(InputAction.CallbackContext _value)
     {
         Vector2 inputMovement = _value.ReadValue<Vector2>().normalized;
+        Vector3 movementDirection = new Vector3(inputMovement.x, 0 , inputMovement.y);
+
+        directionToRun.x = Vector3.Dot(movementDirection.normalized, transform.forward);
+        directionToRun.z = Vector3.Dot(movementDirection.normalized, transform.right);
         velocity.z = inputMovement.y;
         velocity.x = inputMovement.x;
-
-        directionToRun = transform.forward * inputMovement.x + transform.right*inputMovement.y;
-        // playerAnim.SetBool("isRunning",true);
-        // playerAnim.SetFloat("Horizontal", directionToRun.x);
-        // playerAnim.SetFloat("Vertical", directionToRun.z);
         currentState = MageState.Running;
 
         if(_value.canceled)
         {
-            // playerAnim.SetBool("isRunning",false);
             currentState = MageState.Idle;
         }
     }
 
     public void Attack(InputAction.CallbackContext _value)
     {
-        // playerAnim.SetBool("isAttacking", true);
         currentState = MageState.Attacking;
     }
 
