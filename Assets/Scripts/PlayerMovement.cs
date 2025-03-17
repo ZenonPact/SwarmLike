@@ -14,12 +14,16 @@ public class PlayerMovement : MonoBehaviour
     Vector3 velocity;
     Quaternion lookRotation;
     Animator playerAnim;
+    Vector3 directionToRun;
 
     [Header("Fireball Info")]
     [SerializeField] private GameObject fireBallPrefab;
     [SerializeField] private float fireBallSpeed = 20f;
     public UnityEvent OnFireballEvent;
-   
+    
+    //MAGE INFO
+    public enum MageState {Idle, Running, Attacking}
+    public MageState currentState = MageState.Idle;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -33,10 +37,22 @@ public class PlayerMovement : MonoBehaviour
         player.Move(velocity*Time.deltaTime*playerMovementSpeed);
         velocity.y = Physics.gravity.y;
 
-        // if(velocity.y==0 && velocity.x ==0)
-        // {
-        //     playerAnim.SetBool("isRunning",false);
-        // }
+        switch(currentState)
+        {   
+            case MageState.Idle:
+                playerAnim.SetBool("isRunning", false);
+                playerAnim.SetBool("isAttacking", false);
+                break;
+            case MageState.Running:
+                playerAnim.SetBool("isRunning", true);
+                playerAnim.SetFloat("Horizontal", directionToRun.x);
+                playerAnim.SetFloat("Vertical", directionToRun.z);
+
+            break;
+            case MageState.Attacking:
+                playerAnim.SetBool("isAttacking", true);
+            break;
+        }
         
     }
 
@@ -46,20 +62,23 @@ public class PlayerMovement : MonoBehaviour
         velocity.z = inputMovement.y;
         velocity.x = inputMovement.x;
 
-        Vector3 directionToRun = transform.forward * inputMovement.x + transform.right*inputMovement.y;
-        playerAnim.SetBool("isRunning",true);
-        playerAnim.SetFloat("Horizontal", directionToRun.x);
-        playerAnim.SetFloat("Vertical", directionToRun.z);
+        directionToRun = transform.forward * inputMovement.x + transform.right*inputMovement.y;
+        // playerAnim.SetBool("isRunning",true);
+        // playerAnim.SetFloat("Horizontal", directionToRun.x);
+        // playerAnim.SetFloat("Vertical", directionToRun.z);
+        currentState = MageState.Running;
 
         if(_value.canceled)
         {
-            playerAnim.SetBool("isRunning",false);
+            // playerAnim.SetBool("isRunning",false);
+            currentState = MageState.Idle;
         }
     }
 
     public void Attack(InputAction.CallbackContext _value)
     {
-        playerAnim.SetBool("isAttacking", true);
+        // playerAnim.SetBool("isAttacking", true);
+        currentState = MageState.Attacking;
     }
 
     public void ThrowFireball()
@@ -67,7 +86,8 @@ public class PlayerMovement : MonoBehaviour
         GameObject fireball = Instantiate(fireBallPrefab, transform.position + transform.forward * 1.5f, transform.rotation);
         Rigidbody rb = fireball.GetComponent<Rigidbody>();
         rb.linearVelocity = transform.forward * fireBallSpeed;
-        playerAnim.SetBool("isAttacking", false);
+        // playerAnim.SetBool("isAttacking", false);
+        currentState = MageState.Idle;
     }
 
     public void CallThrowFireballEvent()
