@@ -53,12 +53,13 @@ public class PlayerMovement : MonoBehaviour
                 playerAnim.SetBool("isAttacking", true);
             break;
         }
+        Debug.Log(transform.forward);
         
     }
 
     public void OnMovement(InputAction.CallbackContext _value)
     {
-        Vector2 inputMovement = _value.ReadValue<Vector2>();
+        Vector2 inputMovement = _value.ReadValue<Vector2>().normalized;
         velocity.z = inputMovement.y;
         velocity.x = inputMovement.x;
 
